@@ -1,6 +1,9 @@
 ---
 layout: post
 title:  "搭建 Rails 權限管理系統"
+date:   2018-10-16 23:00:00 +0800
+categories: Rails
+tags: Rails CanCanCan Devise
 ---
 
 一間新創公司的網路服務，在從零開始，並一路成長的過程中，在程式開發上一定會遇到的其中一站是：**權限管理系統**，而它又可分為兩個層面：

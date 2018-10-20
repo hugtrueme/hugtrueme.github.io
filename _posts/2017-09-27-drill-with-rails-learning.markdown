@@ -2,7 +2,7 @@
 layout: post
 title:  "能運用「刻意練習」來增進寫程式功力嗎？"
 date:   2017-09-27 17:37:00 +0800
-categories: 刻意練習 Rails
+categories: Rails
 tags: 刻意練習 Rails
 ---
 
