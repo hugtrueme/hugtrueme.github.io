@@ -173,7 +173,7 @@ Rails.application.routes.draw do
 end
 ```
 
-修改 **_Users::RegistrationsController_** ，替讓它在 _create_ action 的時候，可以替 **_User_** 儲存 _role_ 欄位，所以我們要先放行 _role_ 這個參數：
+修改 **_Users::RegistrationsController_** ，讓它在 _create_ action 的時候，可以替 **_User_** 儲存 _role_ 欄位，所以我們要先放行 _role_ 這個參數：
 
 ```
 # app/controllers/users/registrations_controller.rb
@@ -449,7 +449,7 @@ end
 <br>
 ### **結語**
 
-就筆者參與專案的經驗來說，像 **CanCanCan** 這樣的權限管理機制必須儘早引入，以避免權限判斷的程式碼四散於各處，並且對於專案新人必須再三嚴格叮嚀（與嚴格的 code review）所有權限判斷的詳細定義都要在 **app/models/ability.rb** 內做，外部只能使用 `can?` 與 `authorize!`，否則會引起日後維護上的大災難。
+就筆者參與專案的經驗來說，像 **CanCanCan** 這樣的權限管理機制必須儘早引入，以避免權限判斷的程式碼四散於各處，並且對於專案新人必須再三嚴格叮嚀（與嚴格的 code review）所有權限判斷的詳細定義都要在 **app/models/ability.rb** 內做，外部只能使用 `can?` 與 `authorize!`，否則會引起日後維護上的大麻煩。
 
 類似於 CanCanCan 的還有一個叫做 [Pundit] 的 gem ，用途是一樣的，但使用概念上有些不同，有興趣的話請自行研究看看囉。
 
