@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "搭建 Rails 權限管理系統"
+title:  "使用 CanCanCan 搭建 Rails 權限管理系統"
 date:   2018-10-16 23:00:00 +0800
 categories: Rails
 tags: Rails CanCanCan Devise
@@ -11,94 +11,12 @@ tags: Rails CanCanCan Devise
 1. 處理使用者的註冊、登入、忘記密碼
 2. 限制使用者能夠操作哪些功能、看到哪些資料
 
-幸運的是，在 Ruby on Rails 的生態系中，已經有前人優雅地解決了上面的兩個問題，並且將解法打包成 gem 供大家使用。
-本系列文章分為兩部，第一部將帶領大家使用 [Devise] 來搭建使用者註冊管理系統，第二部分則會使用 [CanCanCan] 來建立一個基於角色（Role based）權限管理機制 。
+幸運的是，在 Ruby on Rails 的生態系中，已經有前人優雅地解決了上面的兩個問題，並且將解法打包成 gem 供大家使用。第一項「處理使用者註冊」已有大家熟知的 [Devise] 可以使用，本文章係針對第二項「限制使用者可以操作哪些功能、看到哪些資料」來分享如何使用 [CanCanCan] 來建立一個基於角色（Role based）權限管理機制 。
 
 
 <br>
-#### **以devise搭建使用者註冊系統**
-
-一個基本的註冊系統包含如下功能：
-* 使用 E-mail 註冊
-* 發送驗證信
-* 登入
-* 忘記密碼
-
-更進階一點的還會有以電話簡訊註冊、以第三方帳號如 Facebook、Google 註冊的功能，有機會再向大家分享。
-而以上的幾項基本功能，使用 [Devise] 這個 gem 都可以快速的搭建起來，初學者更可藉著使用這些 gem 的機會，來欣賞到 Ruby on Rails 解決問題的方式竟然可以如此優雅。
-
-以下開始一步步帶領大家實作。
-
-首先，用 `$ rails new` 建立一個新的專案，緊接著建立一個 **_WelcomeController_** 作為迎賓畫面：
-
-```
-$ rails g controller Welcome index
-```
-
-將網站的 root 指向 welcome#index：
-
-```
-# config/routes.rb
-Rails.application.routes.draw do
-  root 'welcome#index'
-end
-```
-
-在 Gemfile 加入 devise：
-
-```
-# Gemfile
-gem 'devise'
-```
-
-然後執行 `$ bundle install`
-
-下一步，執行 Devise 的 generator，這是不可省略的步驟：
-
-```
-$ rails g devise:install
-```
-
-再來依照 devise 的指引，加入 flash message，未來 devise 會將登入成功、密碼錯誤等訊息輸出至 notice 與 alert：
-
-```
-# app/views/layouts/application.html.erb
-<p class="notice"><%= notice %></p>
-<p class="alert"><%= alert %></p>
-```
-
-接著建立一個名為 **_User_** 的 model，用以代表網站使用者：
-
-```
-$ rails g devise User
-```
-
-然後執行 `$ rails db:migrate`
-
-接著在 _application.html.erb_ 內加入 Login/Logout 的 Link
-
-```
-# app/views/layouts/application.html.erb
-<% if user_signed_in? %>
-  <%= "Hello #{current_user.email}!" %>
-  <%= link_to('Logout',
-              destroy_user_session_path,
-              method: :delete) %>
-<% else %>
-  <%= link_to('Login',
-              new_user_session_path) %>
-<% end %>
-```
-此時執行 `$ rails s` 應該會看到網站畫面如下：
-
-![Welcome](/assets/welcome.png)
-
-點選 Login，您會發現 devise 已經替您準備好了 登入、註冊、密碼重設 這三個畫面。
-請實際操作看看，它們是真的可以使用，且已經跟您剛剛建立的 **_User_** 一起運作了起來，您的網站已經擁有一個毫不含糊的使用者註冊功能。
-
+#### **沒有權限機制的蠻荒時代**
 <br>
-#### **以 cancancan 搭建 Role based 權限管理機制**
-
 在一個**沒有**權限管理機制的系統裡面，為了要限制只有管理員（_admin_）可以刪除文章，您可能會這樣做：
 
 ```
@@ -130,6 +48,11 @@ $ rails g devise User
 
 讓 `can?` 這個 method 替你判斷當前的 **_User_** 是否具有 _:destroy_ 的權限，而未來權限條件有所變化時，你也只要修改一個地方，而不是 13 個。如此的美好境界，就是使用 [CanCanCan] 這個 gem 能夠帶來的效果，以下就開始帶領大家看看它是怎麼做到的。
 
+<br>
+#### **基於角色的權限系統（Role Based Authorization）**
+<br>
+
+_(以下的實作範例皆假設各位的專案已安裝 [Devise])_
 
 首先，我們替 **_User_** 定義角色，本篇文章將會模擬一個新聞發布系統，所以我們定義管理員（_admin_） 與 作者（_author_）這兩種角色：
 
@@ -231,7 +154,7 @@ def article_params
 end
 ```
 
-移除 **新增/編輯** 文章時的 user 欄位：
+移除 **新增/編輯** 文章時出現的 user 欄位：
 
 ```
 # app/view/articles/_form.html.erb
@@ -279,7 +202,7 @@ class DashboardController < ApplicationController
 
   # 告訴 devise，此 DashboardController 的所有 action
   # 都必須要登入後的 user 才能使用
-  before_action :authenticate_user!
+  before_action :authenticate_user!ƒ
 
   def index
   end
@@ -320,7 +243,8 @@ end
 接下來，就是重頭戲 **CanCanCan** 了。
 
 <br>
-#### **定義 CanCanCan 的角色權限**
+#### **安裝 CanCanCan**
+<br>
 
 修改 Gemfile 後 `$ bundle install` ：
 
@@ -449,7 +373,7 @@ end
 <br>
 ### **結語**
 
-就筆者參與專案的經驗來說，像 **CanCanCan** 這樣的權限管理機制必須儘早引入，以避免權限判斷的程式碼四散於各處，並且對於專案新人必須再三嚴格叮嚀（與嚴格的 code review）所有權限判斷的詳細定義都要在 **app/models/ability.rb** 內做，外部只能使用 `can?` 與 `authorize!`，否則會引起日後維護上的大麻煩。
+就筆者參與專案的經驗來說，像 **CanCanCan** 這樣的權限管理機制必須儘早引入，以避免權限判斷的程式碼四散於各處，所有的權限判斷式定義都要在 **app/models/ability.rb** 內做，外部只能使用 `can?` 與 `authorize!`，否則會引起日後維護上的大麻煩，並且要在 code review 的時候也要注意同事們的程式碼是否有符合這些原則。
 
 類似於 CanCanCan 的還有一個叫做 [Pundit] 的 gem ，用途是一樣的，但使用概念上有些不同，有興趣的話請自行研究看看囉。
 
