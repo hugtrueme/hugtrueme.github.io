@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Learn to make your own gem in 10 minutes"
-date:   2018-10-16 23:00:00 +0800
+date:   2019-03-16 22:40:00 +0800
 categories: Ruby
 tags: Ruby Gem
 ---
